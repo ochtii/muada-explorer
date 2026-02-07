@@ -1,0 +1,32 @@
+{
+  "name": "muada-explorer",
+  "version": "1.0.0",
+  "description": "Urbex Community Platform - Lost Places Austria",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ochtii/muada-explorer.git"
+  },
+  "keywords": ["urbex", "lost-places", "austria"],
+  "author": "ochtii",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ochtii/muada-explorer/issues"
+  },
+  "homepage": "https://github.com/ochtii/muada-explorer#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.95.3",
+    "@vitejs/plugin-react": "^5.1.3",
+    "leaflet": "^1.9.4",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-leaflet": "^5.0.0",
+    "react-router-dom": "^7.13.0",
+    "vite": "^7.3.1"
+  }
+}

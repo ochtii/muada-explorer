@@ -1,0 +1,84 @@
+.admin-portal-page {
+  padding: 2rem 0;
+  min-height: calc(100vh - 80px);
+}
+
+.admin-portal-page h1 {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.portal-description {
+  text-align: center;
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+  font-size: 1.1rem;
+}
+
+.filter-bar {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.users-table {
+  overflow-x: auto;
+}
+
+.users-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.users-table th {
+  background-color: var(--bg-dark);
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--accent-primary);
+  border-bottom: 2px solid var(--accent-primary);
+}
+
+.users-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--bg-dark);
+}
+
+.users-table tr:hover {
+  background-color: var(--bg-hover);
+}
+
+.role-select {
+  padding: 0.5rem;
+  background-color: var(--bg-dark);
+  color: var(--text-primary);
+  border: 2px solid var(--accent-primary);
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.role-select:hover {
+  background-color: var(--bg-hover);
+}
+
+@media (max-width: 768px) {
+  .users-table {
+    font-size: 0.85rem;
+  }
+
+  .users-table th,
+  .users-table td {
+    padding: 0.5rem;
+  }
+
+  .filter-bar {
+    flex-direction: column;
+  }
+
+  .filter-bar .btn {
+    width: 100%;
+  }
+}
