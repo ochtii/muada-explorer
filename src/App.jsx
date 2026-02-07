@@ -73,7 +73,7 @@ function App() {
         } />
         
         <Route path="/add-location" element={
-          <ProtectedRoute minRole="user">
+          <ProtectedRoute minRole="explorer">
             <AddLocation />
           </ProtectedRoute>
         } />
@@ -85,13 +85,13 @@ function App() {
         } />
         
         <Route path="/mod-portal" element={
-          <ProtectedRoute minRole="mod">
+          <ProtectedRoute minRole="moderator">
             <ModPortal />
           </ProtectedRoute>
         } />
         
         <Route path="/admin-portal" element={
-          <ProtectedRoute minRole="admin">
+          <ProtectedRoute minRole="webmaster">
             <AdminPortal />
           </ProtectedRoute>
         } />

@@ -51,10 +51,19 @@ export const AuthProvider = ({ children }) => {
         .eq('id', userId)
         .single()
 
-      if (error) throw error
+      if (error) {
+        // Wenn kein Profile existiert, zeige hilfreichen Fehler
+        if (error.code === 'PGRST116') {
+          console.error('⚠️ KEIN PROFILE GEFUNDEN! Trigger hat wsl versagt.')
+          console.error('→ Geh zum Supabase Dashboard und führe 02-functions.sql aus!')
+          alert('Schaß! Dein Profile konnte ned erstellt werden.\n\nGeh zum Supabase Dashboard und führe 02-functions.sql aus, dann meld di neu an!')
+        }
+        throw error
+      }
       setProfile(data)
     } catch (error) {
       console.error('Schaß beim Profile laden:', error.message)
+      setProfile(null)
     } finally {
       setLoading(false)
     }
@@ -118,15 +127,29 @@ export const AuthProvider = ({ children }) => {
       if (error) throw error
 
       setProfile(data)
-      return { data, error: null }
-    } catch (error) {
-      return { data: null, error: error.message }
+    // WICHTIG: Diese Rollen müssen mit app_role ENUM übereinstimmen!
+    // Datenbank: 'banned', 'explorer', 'moderator', 'webmaster'
+    const roleHierarchy = {
+      banned: 0,      // Gesperrt
+      explorer: 1,    // Normaler User
+      moderator: 2,   // Moderator
+      webmaster: 3    // Admin/Webmaster
     }
-  }
 
-  const hasRole = (minRole) => {
-    if (!profile) return false
+    const userLevel = roleHierarchy[profile.role]
+    const minLevel = roleHierarchy[minRole]
+    
+    // Wenn Role unbekannt ist, logge Warnung
+    if (userLevel === undefined) {
+      console.warn('⚠️ Unbekannte User-Role:', profile.role)
+      return false
+    }
+    if (minLevel === undefined) {
+      console.warn('⚠️ Unbekannte Min-Role:', minRole)
+      return false
+    }
 
+    return userLevel >= minLevel
     const roleHierarchy = {
       user: 1,
       mitglied: 2,

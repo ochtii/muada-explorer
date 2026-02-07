@@ -30,11 +30,11 @@ const Navbar = () => {
                 </span>
               </Link></li>
               
-              {profile?.role === 'mod' || profile?.role === 'admin' || profile?.role === 'webmaster' ? (
+              {profile?.role === 'moderator' || profile?.role === 'webmaster' ? (
                 <li><Link to="/mod-portal">Mod Portal</Link></li>
               ) : null}
               
-              {profile?.role === 'admin' || profile?.role === 'webmaster' ? (
+              {profile?.role === 'webmaster' ? (
                 <li><Link to="/admin-portal">Admin Portal</Link></li>
               ) : null}
               

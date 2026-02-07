@@ -127,10 +127,10 @@ input:focus, textarea:focus, select:focus {
   font-weight: 600;
 }
 
-.badge-user { background-color: #6c757d; }
-.badge-mitglied { background-color: #17a2b8; }
-.badge-mod { background-color: #ffc107; color: #000; }
-.badge-admin { background-color: #dc3545; }
+/* Role Badges - WICHTIG: Muss mit app_role ENUM übereinstimmen! */
+.badge-banned { background-color: #000; color: #fff; }
+.badge-explorer { background-color: #17a2b8; }
+.badge-moderator { background-color: #ffc107; color: #000; }
 .badge-webmaster { background-color: #9b59b6; }
 
 /* Leaflet Map Styles */

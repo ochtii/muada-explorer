@@ -82,12 +82,12 @@ const AdminPortal = () => {
   }
 
   const getRoleHierarchyLevel = (role) => {
+    // WICHTIG: Muss mit app_role ENUM übereinstimmen!
     const hierarchy = {
-      user: 1,
-      mitglied: 2,
-      mod: 3,
-      admin: 4,
-      webmaster: 5
+      banned: 0,
+      explorer: 1,
+      moderator: 2,
+      webmaster: 3
     }
     return hierarchy[role] || 0
   }
@@ -99,9 +99,9 @@ const AdminPortal = () => {
 
   const availableRoles = () => {
     if (profile.role === 'webmaster') {
-      return ['user', 'mitglied', 'mod', 'admin', 'webmaster']
-    } else if (profile.role === 'admin') {
-      return ['user', 'mitglied', 'mod']
+      return ['banned', 'explorer', 'moderator', 'webmaster']
+    } else if (profile.role === 'moderator') {
+      return ['banned', 'explorer']
     }
     return []
   }
@@ -131,28 +131,28 @@ const AdminPortal = () => {
             Alle ({users.length})
           </button>
           <button
-            onClick={() => setFilter('user')}
-            className={`btn ${filter === 'user' ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setFilter('explorer')}
+            className={`btn ${filter === 'explorer' ? 'btn-primary' : 'btn-secondary'}`}
           >
-            User ({users.filter(u => u.role === 'user').length})
+            Explorer ({users.filter(u => u.role === 'explorer').length})
           </button>
           <button
-            onClick={() => setFilter('mitglied')}
-            className={`btn ${filter === 'mitglied' ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setFilter('moderator')}
+            className={`btn ${filter === 'moderator' ? 'btn-primary' : 'btn-secondary'}`}
           >
-            Mitglied ({users.filter(u => u.role === 'mitglied').length})
+            Moderator ({users.filter(u => u.role === 'moderator').length})
           </button>
           <button
-            onClick={() => setFilter('mod')}
-            className={`btn ${filter === 'mod' ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setFilter('webmaster')}
+            className={`btn ${filter === 'webmaster' ? 'btn-primary' : 'btn-secondary'}`}
           >
-            Mod ({users.filter(u => u.role === 'mod').length})
+            Webmaster ({users.filter(u => u.role === 'webmaster').length})
           </button>
           <button
-            onClick={() => setFilter('admin')}
-            className={`btn ${filter === 'admin' ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setFilter('banned')}
+            className={`btn ${filter === 'banned' ? 'btn-primary' : 'btn-secondary'}`}
           >
-            Admin ({users.filter(u => u.role === 'admin').length})
+            Banned ({users.filter(u => u.role === 'banned').length})
           </button>
         </div>
 
