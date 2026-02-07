@@ -6,10 +6,13 @@ import './Auth.css'
 const Signup = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [username, setUsername] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const { signUp } = useAuth()
   const navigate = useNavigate()
 
@@ -18,14 +21,20 @@ const Signup = () => {
     setError('')
     setLoading(true)
 
+    if (username.length < 3) {
+      setError('Username muss mindestens 3 Zeichen hobn!')
+      setLoading(false)
+      return
+    }
+
     if (password.length < 6) {
       setError('Passwort muss mindestens 6 Zeichen hobn, du Wappla!')
       setLoading(false)
       return
     }
 
-    if (username.length < 3) {
-      setError('Username muss mindestens 3 Zeichen hobn!')
+    if (password !== confirmPassword) {
+      setError('Passwörter stimmen net überein, Oida!')
       setLoading(false)
       return
     }
@@ -89,15 +98,47 @@ const Signup = () => {
 
           <div className="form-group">
             <label htmlFor="password">Passwort</label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-            />
+            <div className="password-input-wrapper">
+              <input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label="Passwort anzeigen"
+              >
+                {showPassword ? '👁️' : '👁️‍🗨️'}
+              </button>
+            </div>
             <small>Mindestens 6 Zeichen</small>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="confirmPassword">Passwort bestätigen</label>
+            <div className="password-input-wrapper">
+              <input
+                id="confirmPassword"
+                type={showConfirmPassword ? 'text' : 'password'}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                aria-label="Passwort anzeigen"
+              >
+                {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
+              </button>
+            </div>
           </div>
 
           <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
