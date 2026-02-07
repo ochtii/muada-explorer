@@ -45,7 +45,19 @@ export const AuthProvider = ({ children }) => {
 
   const fetchProfile = async (userId) => {
     console.log('🔍 fetchProfile() aufgerufen für userId:', userId)
+    
+    // Timeout: Wenn nach 10 Sekunden nichts passiert, abbrechen
+    const timeoutId = setTimeout(() => {
+      console.error('⏰ TIMEOUT! fetchProfile() hängt seit 10 Sekunden!')
+      console.error('→ Supabase antwortet nicht oder Query hängt')
+      console.error('→ Setze loading trotzdem auf false')
+      setLoading(false)
+      setProfile(null)
+      alert('⏰ TIMEOUT!\n\nDie Datenbank antwortet nicht.\n\nPrüfe:\n1. Ist Supabase erreichbar?\n2. Wurden alle SQL-Skripte ausgeführt?\n3. Existiert die profiles Tabelle?')
+    }, 10000) // 10 Sekunden
+    
     try {
+      console.log('📡 Starte Supabase Query...')
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -53,6 +65,7 @@ export const AuthProvider = ({ children }) => {
         .single()
 
       console.log('📊 Supabase Response:', { data, error })
+      clearTimeout(timeoutId) // Query hat geantwortet, Timeout abbrechen
 
       if (error) {
         // Wenn kein Profile existiert, zeige hilfreichen Fehler
@@ -68,6 +81,9 @@ export const AuthProvider = ({ children }) => {
           alert('🔒 PERMISSION DENIED!\n\nDu kannst dein Profile nicht lesen.\n\n→ Führe 03-policies.sql im Supabase SQL Editor aus')
         } else {
           console.error('❌ Unbekannter Fehler beim Profile laden:', error)
+          console.error('Error Code:', error.code)
+          console.error('Error Details:', error.details)
+          console.error('Error Hint:', error.hint)
         }
         throw error
       }
@@ -76,6 +92,7 @@ export const AuthProvider = ({ children }) => {
       setProfile(data)
     } catch (error) {
       console.error('💥 Schaß beim Profile laden:', error.message, error)
+      clearTimeout(timeoutId)
       setProfile(null)
     } finally {
       console.log('🏁 fetchProfile() beendet - setLoading(false)')
