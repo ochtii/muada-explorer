@@ -127,6 +127,15 @@ export const AuthProvider = ({ children }) => {
       if (error) throw error
 
       setProfile(data)
+      return { data, error: null }
+    } catch (error) {
+      return { data: null, error: error.message }
+    }
+  }
+
+  const hasRole = (minRole) => {
+    if (!profile) return false
+
     // WICHTIG: Diese Rollen müssen mit app_role ENUM übereinstimmen!
     // Datenbank: 'banned', 'explorer', 'moderator', 'webmaster'
     const roleHierarchy = {
@@ -150,15 +159,6 @@ export const AuthProvider = ({ children }) => {
     }
 
     return userLevel >= minLevel
-    const roleHierarchy = {
-      user: 1,
-      mitglied: 2,
-      mod: 3,
-      admin: 4,
-      webmaster: 5
-    }
-
-    return roleHierarchy[profile.role] >= roleHierarchy[minRole]
   }
 
   const refreshProfile = () => {
