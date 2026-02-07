@@ -44,6 +44,7 @@ export const AuthProvider = ({ children }) => {
   }, [])
 
   const fetchProfile = async (userId) => {
+    console.log('🔍 fetchProfile() aufgerufen für userId:', userId)
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -51,20 +52,33 @@ export const AuthProvider = ({ children }) => {
         .eq('id', userId)
         .single()
 
+      console.log('📊 Supabase Response:', { data, error })
+
       if (error) {
         // Wenn kein Profile existiert, zeige hilfreichen Fehler
         if (error.code === 'PGRST116') {
           console.error('⚠️ KEIN PROFILE GEFUNDEN! Trigger hat wsl versagt.')
-          console.error('→ Geh zum Supabase Dashboard und führe 02-functions.sql aus!')
-          alert('Schaß! Dein Profile konnte ned erstellt werden.\n\nGeh zum Supabase Dashboard und führe 02-functions.sql aus, dann meld di neu an!')
+          console.error('→ User existiert in auth.users aber NICHT in profiles Tabelle')
+          console.error('→ Führe 99-diagnose.sql aus um zu prüfen welche User fehlen')
+          console.error('→ Dann führe 02-functions.sql aus und registriere dich neu')
+          alert('⚠️ KEIN PROFILE!\n\nDu wurdest registriert aber dein Profile wurde nicht erstellt.\n\n1. Geh zu Supabase SQL Editor\n2. Führe 99-diagnose.sql aus\n3. Führe 02-functions.sql aus\n4. Lösche deinen User und registriere dich neu')
+        } else if (error.code === '42501') {
+          console.error('🔒 PERMISSION DENIED! RLS Policy fehlt oder ist falsch')
+          console.error('→ Führe 03-policies.sql aus!')
+          alert('🔒 PERMISSION DENIED!\n\nDu kannst dein Profile nicht lesen.\n\n→ Führe 03-policies.sql im Supabase SQL Editor aus')
+        } else {
+          console.error('❌ Unbekannter Fehler beim Profile laden:', error)
         }
         throw error
       }
+      
+      console.log('✅ Profile geladen:', data)
       setProfile(data)
     } catch (error) {
-      console.error('Schaß beim Profile laden:', error.message)
+      console.error('💥 Schaß beim Profile laden:', error.message, error)
       setProfile(null)
     } finally {
+      console.log('🏁 fetchProfile() beendet - setLoading(false)')
       setLoading(false)
     }
   }
