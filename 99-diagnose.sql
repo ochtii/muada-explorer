@@ -1,117 +1,91 @@
 -- ============================================================================
--- MUADA EXPLORER - DIAGNOSE SCRIPT
+-- MUADA EXPLORER - DEBUG SCRIPT
 -- ============================================================================
--- Zeigt Status der Datenbank und prüft ob alles richtig eingerichtet ist
+-- Testet ob Profile-Zugriff funktioniert und zeigt alle wichtigen Infos
 -- ============================================================================
 
 -- ────────────────────────────────────────────────────────────────────────────
--- 1. TABELLEN ÜBERSICHT
+-- 1. AUTH.USERS - Zeige alle registrierten User
 -- ────────────────────────────────────────────────────────────────────────────
 
 SELECT 
-  '📊 TABELLEN' as check_type,
-  schemaname,
-  tablename,
-  rowsecurity as rls_enabled
-FROM pg_tables
+  '👤 AUTH.USERS' as check_type,
+  id,
+  email,
+  raw_user_meta_data->>'username' as username_in_metadata,
+  created_at
+FROM auth.users
+ORDER BY created_at DESC;
+
+-- ────────────────────────────────────────────────────────────────────────────
+-- 2. PROFILES - Zeige alle Profile
+-- ────────────────────────────────────────────────────────────────────────────
+
+SELECT 
+  '📋 PROFILES' as check_type,
+  id,
+  username,
+  role,
+  level,
+  points,
+  created_at
+FROM profiles
+ORDER BY created_at DESC;
+
+-- ────────────────────────────────────────────────────────────────────────────
+-- 3. RLS STATUS - Ist RLS aktiviert?
+-- ────────────────────────────────────────────────────────────────────────────
+4. RLS POLICIES - Welche Policies existieren?
+-- ────────────────────────────────────────────────────────────────────────────
+
+SELECT 
+  '🔐 RLS POLICIES' as check_type,
+  policyname,
+  cmd as command
+FROM pg_policies
 WHERE schemaname = 'public'
-  AND tablename IN ('profiles', 'locations', 'visits', 'reviews')
-ORDER BY tablename;
+  AND tablename = 'profiles'
+ORDER BY policyname;
 
 -- ────────────────────────────────────────────────────────────────────────────
--- 2. ZÄHLER
--- ────────────────────────────────────────────────────────────────────────────
-
-SELECT '📈 ZÄHLER' as check_type, 'auth.users' as tabelle, COUNT(*) as anzahl FROM auth.users
-UNION ALL
-SELECT '📈 ZÄHLER', 'profiles', COUNT(*) FROM profiles
-UNION ALL
-SELECT '📈 ZÄHLER', 'locations', COUNT(*) FROM locations
-UNION ALL
-SELECT '📈 ZÄHLER', 'locations (approved)', COUNT(*) FROM locations WHERE approved = true
-UNION ALL
-SELECT '📈 ZÄHLER', 'visits', COUNT(*) FROM visits
-UNION ALL
-SELECT '📈 ZÄHLER', 'reviews', COUNT(*) FROM reviews;
-
--- ────────────────────────────────────────────────────────────────────────────
--- 3. TRIGGER ÜBERSICHT
+-- 5. TRIGGER - Existiert der handle_new_user Trigger?
 -- ────────────────────────────────────────────────────────────────────────────
 
 SELECT 
-  '⚡ TRIGGERS' as check_type,
+  '⚡ TRIGGER' as check_type,
   tgname as trigger_name,
   tgrelid::regclass as table_name,
   tgenabled as enabled
 FROM pg_trigger
-WHERE tgname IN (
-  'on_auth_user_created',
-  'profiles_updated_at',
-  'locations_updated_at',
-  'reviews_updated_at',
-  'visits_update_gamification',
-  'locations_update_gamification',
-  'reviews_update_gamification',
-  'visits_update_location_stats',
-  'reviews_update_location_stats'
-)
-ORDER BY tgname;
+WHERE tgname = 'on_auth_user_created';
 
 -- ────────────────────────────────────────────────────────────────────────────
--- 4. FUNCTIONS ÜBERSICHT
+-- 6. VERGLEICH - Stimmen auth.users und profiles überein?
 -- ────────────────────────────────────────────────────────────────────────────
 
 SELECT 
-  '⚙️ FUNCTIONS' as check_type,
-  proname as function_name,
-  pronargs as num_args
-FROM pg_proc
-WHERE pronamespace = 'public'::regnamespace
-  AND proname IN (
-    'handle_new_user',
-    'update_timestamp',
-    'calculate_user_points',
-    'calculate_level',
-    'update_user_gamification',
-    'update_location_stats',
-    'get_user_role'
-  )
-ORDER BY proname;
+  '🔍 DIFF CHECK' as check_type,
+  'User in auth.users aber NICHT in profiles' as info,
+  u.id,
+  u.email,
+  u.raw_user_meta_data->>'username' as username
+FROM auth.users u
+LEFT JOIN profiles p ON u.id = p.id
+WHERE p.id IS NULL;
 
 -- ────────────────────────────────────────────────────────────────────────────
--- 5. STORAGE BUCKETS
+-- 7. ALLE TABELLEN COUNTS
 -- ────────────────────────────────────────────────────────────────────────────
 
-SELECT 
-  '🗂️ STORAGE' as check_type,
-  name as bucket_name,
-  public,
-  file_size_limit,
-  allowed_mime_types
-FROM storage.buckets
-WHERE name IN ('locations', 'avatars')
-ORDER BY name;
-
--- ────────────────────────────────────────────────────────────────────────────
--- 6. USER ÜBERSICHT (wenn vorhanden)
--- ────────────────────────────────────────────────────────────────────────────
-
-SELECT 
-  '👥 USERS' as check_type,
-  p.username,
-  p.role,
-  p.level,
-  p.points,
-  p.created_at,
-  (SELECT COUNT(*) FROM locations WHERE submitted_by = p.id) as locations_submitted,
-  (SELECT COUNT(*) FROM visits WHERE user_id = p.id) as visits_count,
-  (SELECT COUNT(*) FROM reviews WHERE user_id = p.id) as reviews_count
-FROM profiles p
-ORDER BY p.created_at DESC
-LIMIT 10;
-
--- ────────────────────────────────────────────────────────────────────────────
--- 7. RLS POLICIES ÜBERSICHT
+SELECT '📈 COUNTS' as check_type, 'auth.users' as tabelle, COUNT(*) as anzahl FROM auth.users
+UNION ALL
+SELECT '📈 COUNTS', 'profiles', COUNT(*) FROM profiles
+UNION ALL
+SELECT '📈 COUNTS', 'locations', COUNT(*) FROM locations
+UNION ALL
+SELECT '📈 COUNTS', 'visits', COUNT(*) FROM visits
+UNION ALL
+SELECT '📈 COUNTS', 'reviews', COUNT(*) FROM reviews
 -- ────────────────────────────────────────────────────────────────────────────
 
 SELECT 
@@ -127,3 +101,21 @@ ORDER BY tablename, policyname;
 -- ============================================================================
 -- FERTIG! ✓
 -- ============================================================================
+WENN DU FEHLER SIEHST:
+-- ============================================================================
+-- 
+-- ❌ User in auth.users aber NICHT in profiles
+--    → Trigger hat nicht funktioniert!
+--    → Lösche den User und registriere dich neu
+--    → ODER führe 02-functions.sql aus und erstelle Profile manuell:
+--      INSERT INTO profiles (id, username) 
+--      VALUES ('USER_ID_HIER', 'username_hier');
+-- 
+-- ❌ Trigger "on_auth_user_created" existiert nicht
+--    → Führe 02-functions.sql aus!
+-- 
+-- ❌ RLS Policy fehlt
+--    → Führe 03-policies.sql aus!
+-- 
+-- ============================================================================
+-- 
